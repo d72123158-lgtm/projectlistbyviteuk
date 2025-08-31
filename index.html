@@ -2,47 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Product List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shopping List</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 0 16px;
-      background-color: #f9f9f9;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+      max-width: 500px;
+      margin: auto;
     }
 
     h1 {
       text-align: center;
-      color: #333;
-    }
-
-    #inputContainer {
-      display: flex;
-      margin-bottom: 16px;
     }
 
     input[type="text"] {
-      flex: 1;
+      width: 70%;
       padding: 10px;
-      font-size: 16px;
+      margin-bottom: 10px;
       border: 1px solid #ccc;
-      border-radius: 4px 0 0 4px;
+      border-radius: 4px;
     }
 
     button {
-      padding: 10px 16px;
-      font-size: 16px;
+      padding: 10px 15px;
+      margin-left: 5px;
       border: none;
-      background-color: #007bff;
+      border-radius: 4px;
+      background-color: #28a745;
       color: white;
       cursor: pointer;
-      border-radius: 0 4px 4px 0;
     }
 
     button:hover {
-      background-color: #0056b3;
+      opacity: 0.9;
     }
 
     ul {
@@ -51,92 +45,125 @@
     }
 
     li {
-      background-color: white;
-      padding: 12px 16px;
-      margin-bottom: 8px;
-      border-radius: 6px;
+      background: white;
+      margin-bottom: 10px;
+      padding: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      transition: background-color 0.2s;
+      border-radius: 4px;
+      box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
     }
 
-    li.bought {
-      background-color: #d4edda;
+    .checked {
       text-decoration: line-through;
-      color: #155724;
+      color: gray;
     }
 
-    .checkmark {
-      font-size: 20px;
-      cursor: pointer;
+    .actions {
+      display: flex;
+      gap: 10px;
     }
 
-    @media (max-width: 600px) {
-      body {
-        margin: 10px;
+    .delete-btn {
+      background-color: #dc3545;
+    }
+
+    @media (max-width: 500px) {
+      input[type="text"] {
+        width: 100%;
+        margin-bottom: 10px;
       }
 
       button {
-        font-size: 14px;
+        width: 100%;
+        margin: 5px 0;
       }
 
-      input[type="text"] {
-        font-size: 14px;
+      .actions {
+        flex-direction: column;
+        gap: 5px;
       }
     }
   </style>
 </head>
 <body>
-  <h1>🛒 Shopping List</h1>
 
-  <div id="inputContainer">
-    <input type="text" id="productInput" placeholder="Add a product" />
-    <button onclick="addProduct()">Add</button>
-  </div>
+  <h1>Shopping List</h1>
+  <input type="text" id="itemInput" placeholder="Add a product..." />
+  <button onclick="addItem()">Add</button>
 
-  <ul id="productList"></ul>
+  <ul id="itemList"></ul>
 
   <script>
-    let products = [];
+    let itemList = [];
 
-    const listEl = document.getElementById('productList');
-    const inputEl = document.getElementById('productInput');
-
-    function renderList() {
-      listEl.innerHTML = '';
-      products.forEach((product, index) => {
-        const li = document.createElement('li');
-        li.className = product.bought ? 'bought' : '';
-
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = product.name;
-
-        const check = document.createElement('span');
-        check.className = 'checkmark';
-        check.textContent = product.bought ? '✅' : '☐';
-        check.onclick = () => {
-          products[index].bought = !products[index].bought;
-          renderList();
-        };
-
-        li.appendChild(nameSpan);
-        li.appendChild(check);
-        listEl.appendChild(li);
-      });
+    function saveList() {
+      localStorage.setItem("shoppingList", JSON.stringify(itemList));
     }
 
-    function addProduct() {
-      const name = inputEl.value.trim();
-      if (name === '') return;
-      products.push({ name, bought: false });
-      inputEl.value = '';
+    function loadList() {
+      const saved = localStorage.getItem("shoppingList");
+      if (saved) {
+        itemList = JSON.parse(saved);
+        renderList();
+      }
+    }
+
+    function addItem() {
+      const input = document.getElementById("itemInput");
+      const text = input.value.trim();
+      if (text !== "") {
+        itemList.push({ text, checked: false });
+        input.value = "";
+        saveList();
+        renderList();
+      }
+    }
+
+    function toggleCheck(index) {
+      itemList[index].checked = !itemList[index].checked;
+      saveList();
       renderList();
     }
 
-    // Start fresh every time
-    renderList();
+    function deleteItem(index) {
+      itemList.splice(index, 1);
+      saveList();
+      renderList();
+    }
+
+    function renderList() {
+      const list = document.getElementById("itemList");
+      list.innerHTML = "";
+
+      itemList.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.className = item.checked ? "checked" : "";
+
+        const span = document.createElement("span");
+        span.textContent = item.text;
+        span.style.flexGrow = 1;
+        span.onclick = () => toggleCheck(index);
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.className = "delete-btn";
+        deleteBtn.onclick = () => deleteItem(index);
+
+        actions.appendChild(deleteBtn);
+
+        li.appendChild(span);
+        li.appendChild(actions);
+
+        list.appendChild(li);
+      });
+    }
+
+    loadList();
   </script>
 </body>
 </html>
