@@ -30,9 +30,22 @@
       margin-left: 5px;
       border: none;
       border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .add-btn {
       background-color: #28a745;
       color: white;
-      cursor: pointer;
+    }
+
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .check-btn {
+      background-color: #007bff;
+      color: white;
     }
 
     button:hover {
@@ -55,18 +68,14 @@
       box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
     }
 
-    .checked {
+    .checked span {
       text-decoration: line-through;
       color: gray;
     }
 
     .actions {
       display: flex;
-      gap: 10px;
-    }
-
-    .delete-btn {
-      background-color: #dc3545;
+      gap: 5px;
     }
 
     @media (max-width: 500px) {
@@ -82,7 +91,6 @@
 
       .actions {
         flex-direction: column;
-        gap: 5px;
       }
     }
   </style>
@@ -91,7 +99,7 @@
 
   <h1>Shopping List</h1>
   <input type="text" id="itemInput" placeholder="Add a product..." />
-  <button onclick="addItem()">Add</button>
+  <button class="add-btn" onclick="addItem()">Add</button>
 
   <ul id="itemList"></ul>
 
@@ -139,21 +147,25 @@
 
       itemList.forEach((item, index) => {
         const li = document.createElement("li");
-        li.className = item.checked ? "checked" : "";
+        if (item.checked) li.classList.add("checked");
 
         const span = document.createElement("span");
         span.textContent = item.text;
-        span.style.flexGrow = 1;
-        span.onclick = () => toggleCheck(index);
 
         const actions = document.createElement("div");
         actions.className = "actions";
 
+        const checkBtn = document.createElement("button");
+        checkBtn.textContent = item.checked ? "✅" : "✔️";
+        checkBtn.className = "check-btn";
+        checkBtn.onclick = () => toggleCheck(index);
+
         const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Delete";
+        deleteBtn.textContent = "❌";
         deleteBtn.className = "delete-btn";
         deleteBtn.onclick = () => deleteItem(index);
 
+        actions.appendChild(checkBtn);
         actions.appendChild(deleteBtn);
 
         li.appendChild(span);
@@ -167,7 +179,3 @@
   </script>
 </body>
 </html>
-
-</body>
-</html>
-
